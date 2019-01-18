@@ -41,6 +41,7 @@ public class MessageResource {
 	public String getArg(String argument){
 		//List<Message> list = null;
 		messageService.getAllMessages(argument);
+		String test = "";
 		return argument;
 	}
 //	
@@ -48,6 +49,7 @@ public class MessageResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Message> getMessages() {
 		return messageService.getAllMessages("");
+		
 	}
 	
 	
