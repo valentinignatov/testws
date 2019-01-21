@@ -23,18 +23,29 @@ public class MessageService {
 		List<Message> list2 = new ArrayList<Message>();
 		list2.add(m3);
 		list2.add(m4);
-
+		
+		//Message argument = new Message();
+		
 		HelloWorldImplService helloService = new HelloWorldImplService();
 		HelloWorld hello = helloService.getHelloWorldImplPort();
-		String name = hello.getHelloWorldAsString("Chirila");
-		System.out.println(name + " <-the Name===============================");
+		//String name = hello.getHelloWorldAsString(argument);
+		System.out.println(hello.getHelloWorldAsString(argument) + " <-the Name===============================");
 		System.out.println(argument + " <-the Arg===============================");
 
-		if (name.equals("JORA")) {
+		//return hello.getHelloWorldAsString(argument);
+		
+		if (hello.getHelloWorldAsString(argument).equals("JORA")) {
 			return list2;
-		} else {
-			return list;
 		}
+		//if (hello.getHelloWorldAsString(argument).equals("VANEA")) 
+		else
+		{
+			return list;
+		} 
+		
+	
+		
+		
 
 		// url http://localhost:8080/messenger/webapi/messages
 	}

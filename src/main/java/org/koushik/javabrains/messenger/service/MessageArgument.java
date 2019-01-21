@@ -13,7 +13,7 @@ public class MessageArgument {
 		return Arg;
 	}
 
-	public void setArg(String arg) {
-		Arg = arg;
+	public String setArg(String arg) {
+		return Arg = arg;
 	}
 }
