@@ -6,13 +6,19 @@ import java.util.List;
 //import java.util.logging.SimpleFormatter;
 //import java.util.logging.FileHandler;
 //import java.util.logging.Level;
-
+import java.util.List;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import org.koushik.javabrains.messenger.model.Message;
@@ -43,13 +49,13 @@ public class MessageResource {
 		//HERE WE RETURN THE MESSEGES
 //		messageService.getAllMessages(argument);
 		System.out.println(argument.getMessage());
-		System.out.println(argument.getAuthor());
+//		System.out.println(headparam.getHeaderString("headparam1"));
 //		logger.debug(argument.getMessage());
 		return messageService.getAllMessages(argument.getMessage());
 	}
 	// For  POST
 	/*public MessageArgument setArg(String test){
-		return messageArgument.setArg(test);
+		return messageArgument.setArg(test	);
 	}*/
 //	
 	@GET
@@ -59,6 +65,17 @@ public class MessageResource {
 		
 	}
 	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/query")
+	public List<Message> getUsers(@Context UriInfo info) {
+		//Message argument = null;
+		String from = info.getQueryParameters().getFirst("name");
+		System.out.println(from + " <-From");
+		//argument.setMessage(from);
+		System.out.println("messageService.getAllMessages(from): " + messageService.getAllMessages(from).get(0));
+		return messageService.getAllMessages(from);
+	}
 	
 	
 }
