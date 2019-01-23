@@ -24,6 +24,10 @@ public class MessageService {
 		list2.add(m3);
 		list2.add(m4);
 		
+		List<Message> list3 = new ArrayList<Message>();
+		Message m5 = new Message(666L, "Default", "Default");
+		list3.add(m5);
+		
 		//Message argument = new Message();
 		
 		HelloWorldImplService helloService = new HelloWorldImplService();
@@ -37,10 +41,13 @@ public class MessageService {
 		if (hello.getHelloWorldAsString(argument).equals("JORA")) {
 			return list2;
 		}
-		//if (hello.getHelloWorldAsString(argument).equals("VANEA")) 
-		else
+		if (hello.getHelloWorldAsString(argument).equals("VANEA")) 
 		{
 			return list;
+		} 
+		else
+		{
+			return list3;
 		} 
 		
 	

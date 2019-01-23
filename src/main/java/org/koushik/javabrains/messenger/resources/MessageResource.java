@@ -8,6 +8,7 @@ import java.util.List;
 //import java.util.logging.Level;
 import java.util.List;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -42,7 +43,8 @@ public class MessageResource {
 	//final static Logger logger = Logger.getLogger(classname.class);
 
 	MessageService messageService = new MessageService();
-//	@Path("/post")
+	
+	//AICI PRIMESC OBIECT JSON PRIN BODY	
 	@POST	
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -58,14 +60,16 @@ public class MessageResource {
 	/*public MessageArgument setArg(String test){
 		return messageArgument.setArg(test	);
 	}*/
-//	
+	
+	//AICI PRIMESC VALOAREA PRIN HEADER
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Message> getMessages() {
-		return messageService.getAllMessages("");
-		
+	public List<Message> getMessages(@HeaderParam("headerAuthor") String headerAuthor) {
+		System.out.println("headerAuthor: " + headerAuthor);
+		return messageService.getAllMessages(headerAuthor);
 	}
 	
+	//AICI PRIMESC VALOAREA PRIN QUERY PARAM
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/query")
@@ -78,11 +82,11 @@ public class MessageResource {
 		return messageService.getAllMessages(from);
 	}
 	
+	//AICI PRIMESC VALOARE PRIN URL
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/{urlParam}")
 	public List<Message> getUrl(@PathParam("urlParam")String urlPar){
-		
 		return messageService.getAllMessages(urlPar);
 	}
 }
