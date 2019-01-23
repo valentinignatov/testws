@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -77,5 +78,11 @@ public class MessageResource {
 		return messageService.getAllMessages(from);
 	}
 	
-	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{urlParam}")
+	public List<Message> getUrl(@PathParam("urlParam")String urlPar){
+		
+		return messageService.getAllMessages(urlPar);
+	}
 }
