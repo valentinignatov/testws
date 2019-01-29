@@ -1,5 +1,6 @@
 package org.koushik.javabrains.messenger.resources;
 
+import java.sql.SQLException;
 //import java.util.ArrayList;
 import java.util.List;
 //import java.util.logging.Logger;
@@ -27,6 +28,8 @@ import org.koushik.javabrains.messenger.model.Message;
 import org.koushik.javabrains.messenger.service.MessageArgument;
 import org.koushik.javabrains.messenger.service.MessageService;
 
+import com.mkyong.ws.MySQLAccess;
+
 //import com.mkyong.ws.HelloWorld;
 //import com.mkyong.ws.HelloWorldImplService;	
 
@@ -43,18 +46,22 @@ public class MessageResource {
 	//final static Logger logger = Logger.getLogger(classname.class);
 
 	MessageService messageService = new MessageService();
+	MySQLAccess mySQLAccess = new MySQLAccess();
 	
 	//AICI PRIMESC OBIECT JSON PRIN BODY	
 	@POST	
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Message> getArg(Message argument){
+	public List<Message> getArg(Message argument) throws NumberFormatException, SQLException{
 		//HERE WE RETURN THE MESSEGES
+		MySQLAccess access = new MySQLAccess();
 //		messageService.getAllMessages(argument);
+		System.out.println("The argument is "+ argument.getMessage());
 		System.out.println(argument.getMessage());
 //		System.out.println(headparam.getHeaderString("headparam1"));
 //		logger.debug(argument.getMessage());
-		return messageService.getAllMessages(argument.getMessage());
+		
+		return messageService.getAllMessages(access.selectRecordsFromTable(Integer.parseInt(argument.getMessage())));
 	}
 	// For  POST
 	/*public MessageArgument setArg(String test){
@@ -64,29 +71,55 @@ public class MessageResource {
 	//AICI PRIMESC VALOAREA PRIN HEADER
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Message> getMessages(@HeaderParam("headerAuthor") String headerAuthor) {
+	public List<Message> getMessages(@HeaderParam("headerAuthor") int headerAuthor) throws NumberFormatException, SQLException {
+		MySQLAccess access = new MySQLAccess();
 		System.out.println("headerAuthor: " + headerAuthor);
-		return messageService.getAllMessages(headerAuthor);
+		return messageService.getAllMessages(access.selectRecordsFromTable(headerAuthor));
 	}
 	
 	//AICI PRIMESC VALOAREA PRIN QUERY PARAM
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/query")
-	public List<Message> getUsers(@Context UriInfo info) {
+	public List<Message> getUsers(@Context UriInfo info) throws NumberFormatException, SQLException {
+		MySQLAccess access = new MySQLAccess();
 		//Message argument = null;
 		String from = info.getQueryParameters().getFirst("name");
 		System.out.println(from + " <-From");
 		//argument.setMessage(from);
-		System.out.println("messageService.getAllMessages(from): " + messageService.getAllMessages(from).get(0));
-		return messageService.getAllMessages(from);
+		//System.out.println("messageService.getAllMessages(from): " + messageService.getAllMessages(from).get(0));
+		return messageService.getAllMessages(access.selectRecordsFromTable(Integer.parseInt(from)));
 	}
 	
 	//AICI PRIMESC VALOARE PRIN URL
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/{urlParam}")
-	public List<Message> getUrl(@PathParam("urlParam")String urlPar){
-		return messageService.getAllMessages(urlPar);
+	public List<Message> getUrl(@PathParam("urlParam")int urlPar) throws SQLException{
+		MySQLAccess access = new MySQLAccess();
+		/*try {
+			access.selectRecordsFromTable(Integer.parseInt(urlPar));
+			
+			System.out.println("============="+access.selectRecordsFromTable(Integer.parseInt(urlPar)));
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+		
+		/*System.out.println("request with 1"+access.selectRecordsFromTable(1));
+		System.out.println("request with 2"+access.selectRecordsFromTable(2));*/
+		
+		return messageService.getAllMessages(access.selectRecordsFromTable(urlPar));
+		
+		/* try {
+			System.out.println(access.selectRecordsFromTable(1));
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		 return "It's OK";*/
 	}
+	
+	//AICI SCOT VALOAREA DIN DB DUPA ID
+	
 }
