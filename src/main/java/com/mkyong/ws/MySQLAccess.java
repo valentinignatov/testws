@@ -5,8 +5,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import org.koushik.javabrains.messenger.model.Message;
 import org.koushik.javabrains.messenger.resources.Test;
 
 public class MySQLAccess {
@@ -30,14 +33,13 @@ public static void main(String[] argv) {
 
 }
 
-public String selectRecordsFromTable(int id) throws SQLException {
-
+public List<Message> selectRecordsFromTable(int id) throws SQLException {
+	
 	Connection dbConnection = null;
 	PreparedStatement preparedStatement = null;
-
-	String selectSQL = "SELECT Carti FROM produse WHERE id = ?";
-
-	Test test = new Test();
+	String selectSQL = "select * from produse where id <= ?;";// where id=?;";
+    Message message = new Message();
+    List<Message> messages = new ArrayList<Message>();
 	
 	try {
 		dbConnection = getDBConnection();
@@ -48,11 +50,9 @@ public String selectRecordsFromTable(int id) throws SQLException {
 		ResultSet rs = preparedStatement.executeQuery();
 
 		while (rs.next()) {
-
-			 test.setCarti(rs.getString("carti"));
-			
-			
-
+			message = new Message(rs.getInt("id"),rs.getString("Carti"),rs.getString("Pixuri"),rs.getString("Costume"));
+			System.out.println("rs.getInt('id'): " + rs.getInt("id"));
+			messages.add(message);
 		}
 
 	} catch (SQLException e) {
@@ -71,7 +71,7 @@ public String selectRecordsFromTable(int id) throws SQLException {
 
 	}
 	
-	return test.toString();
+	return messages;
 
 }
 

@@ -1,74 +1,88 @@
 package org.koushik.javabrains.messenger.resources;
-
-import java.sql.SQLException;
-//import java.util.ArrayList;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-//import java.util.logging.Logger;
-//import java.util.logging.SimpleFormatter;
-//import java.util.logging.FileHandler;
-//import java.util.logging.Level;
-import java.util.List;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-
 import org.koushik.javabrains.messenger.model.Message;
 import org.koushik.javabrains.messenger.service.MessageArgument;
 import org.koushik.javabrains.messenger.service.MessageService;
-
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import com.mkyong.ws.HelloWorld;
+import com.mkyong.ws.HelloWorldImplService;
 import com.mkyong.ws.MySQLAccess;
-
-//import com.mkyong.ws.HelloWorld;
-//import com.mkyong.ws.HelloWorldImplService;	
-
-
 @Path("/messages")
 public class MessageResource {
 	String test = "";
+	List<Message> controllerResponse = new ArrayList<Message>();
 	MessageArgument messageArgument = new MessageArgument();
-	/*Logger logger = Logger.getLogger("MyLog");
-	fh = new FileHandler("C:/MyLogFile.log");  
-    logger.addHandler(fh);
-    SimpleFormatter formatter = new SimpleFormatter();  
-    fh.setFormatter(formatter);  */
-	//final static Logger logger = Logger.getLogger(classname.class);
-
 	MessageService messageService = new MessageService();
 	MySQLAccess mySQLAccess = new MySQLAccess();
-	
+	ExecutorService service = Executors.newFixedThreadPool(100); 
+	Message message = new Message();
 	//AICI PRIMESC OBIECT JSON PRIN BODY	
+	@SuppressWarnings("unchecked")
 	@POST	
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Message> getArg(Message argument) throws NumberFormatException, SQLException{
+	public List<Message> getArg(Message message) throws Exception{
 		//HERE WE RETURN THE MESSEGES
 		MySQLAccess access = new MySQLAccess();
-//		messageService.getAllMessages(argument);
-		System.out.println("The argument is "+ argument.getMessage());
-		System.out.println(argument.getMessage());
-//		System.out.println(headparam.getHeaderString("headparam1"));
-//		logger.debug(argument.getMessage());
+		System.out.println("------------------------------- ");
+		System.out.println("(In Controler)The argument is "+ message.getId());
+		List<Message> messages = null;
+		messages = access.selectRecordsFromTable((int)message.getId());
+		System.out.println("Object returned from selectRecordFromTable()====== " + message.toString());
+		Callable<String> callable = new MyCallable(test);	
+		List<MyThreadIgor> listOfThreads = new ArrayList<>();
+		List<Future<List<Message>>> futures = new ArrayList<Future<List<Message>>>();
+//		List<String> listTest = new ArrayList<>();
+//		listTest.add(message.getCarti());
+//		listTest.add(message.getCostume());
+//		listTest.add(message.getPixuri());
+		System.out.println("messages.size(): " + messages.size());
 		
-		return messageService.getAllMessages(access.selectRecordsFromTable(Integer.parseInt(argument.getMessage())));
+		
+		for (Message localMessage: messages){
+			int item = (int) localMessage.getId();
+			MyThreadIgor listItemIgor = new MyThreadIgor(localMessage.getCarti());
+//			System.out.println("access.selectRecordsFromTable(item)"+access.selectRecordsFromTable(item));
+			listOfThreads.add(listItemIgor);
+			
+			/*List<Message> rsp = service.submit(listItemIgor).get();
+			System.out.println("Response from call() method: " + rsp);
+			controllerResponse.addAll(rsp);*/
+
+			//controllerResponse.add();
+			//MyRunnable thread = new MyRunnable();
+			//new Thread(thread).start();
+			// ... join through some method
+			//new Thread(futureTask).start();
+			//System.out.println(futureTask.get());
+			//MyCallable listItemIgor = new MyCallable(localMessage.getCarti());
+			//String value = thread.getValue();
+			//System.out.println("COntroler Thread value: " + value);
+			
+		}
+		
+		futures = service.invokeAll(listOfThreads);
+		System.out.println("futures.size()"+futures.size());
+		for (int i=0; i<futures.size(); i++) {
+			System.out.println("futures: "+futures.get(i).get());
+			controllerResponse.addAll(futures.get(i).get());
+		};
+		return controllerResponse;
 	}
-	// For  POST
-	/*public MessageArgument setArg(String test){
-		return messageArgument.setArg(test	);
-	}*/
-	
-	//AICI PRIMESC VALOAREA PRIN HEADER
+
+/*	//AICI PRIMESC VALOAREA PRIN HEADER
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Message> getMessages(@HeaderParam("headerAuthor") int headerAuthor) throws NumberFormatException, SQLException {
@@ -83,11 +97,8 @@ public class MessageResource {
 	@Path("/query")
 	public List<Message> getUsers(@Context UriInfo info) throws NumberFormatException, SQLException {
 		MySQLAccess access = new MySQLAccess();
-		//Message argument = null;
 		String from = info.getQueryParameters().getFirst("name");
 		System.out.println(from + " <-From");
-		//argument.setMessage(from);
-		//System.out.println("messageService.getAllMessages(from): " + messageService.getAllMessages(from).get(0));
 		return messageService.getAllMessages(access.selectRecordsFromTable(Integer.parseInt(from)));
 	}
 	
@@ -97,29 +108,69 @@ public class MessageResource {
 	@Path("/{urlParam}")
 	public List<Message> getUrl(@PathParam("urlParam")int urlPar) throws SQLException{
 		MySQLAccess access = new MySQLAccess();
-		/*try {
-			access.selectRecordsFromTable(Integer.parseInt(urlPar));
-			
-			System.out.println("============="+access.selectRecordsFromTable(Integer.parseInt(urlPar)));
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-		
-		/*System.out.println("request with 1"+access.selectRecordsFromTable(1));
-		System.out.println("request with 2"+access.selectRecordsFromTable(2));*/
-		
 		return messageService.getAllMessages(access.selectRecordsFromTable(urlPar));
+	}*/
+	
+}
+
+
+class MyThreadIgor implements Callable<List<Message>>{
+	private String item; 
+	private String response = "";
+	MessageService messageService = new MessageService();
+	
+	public String getResponse() {
+		return response;
+	}
+	public void setResponse(String response) {
+		this.response = response;
+	}
+	HelloWorldImplService helloService = new HelloWorldImplService();
+	HelloWorld hello = helloService.getHelloWorldImplPort();
+	
+	public MyThreadIgor(String item) {
+		this.item = item;
+	}
+	@Override
+	public List<Message> call(){
+		System.out.println("Thread name is------------------------------- " + Thread.currentThread().getName());
+		System.out.println("(In Thread)item" + item);
+		String rspTmp = hello.getHelloWorldAsString(item);	
+		System.out.println("(In Thread)hello.getHelloWorldAsString(item) !!!= " + rspTmp);
+		setResponse(rspTmp);
 		
-		/* try {
-			System.out.println(access.selectRecordsFromTable(1));
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		 return "It's OK";*/
+		return messageService.getAllMessages(rspTmp);
+	}
+}
+
+class MyCallable implements Callable<String>{
+	private String item;
+
+	public MyCallable(String item) {
+		this.item = item;
 	}
 	
-	//AICI SCOT VALOAREA DIN DB DUPA ID
-	
+	@Override
+	public String call() throws Exception {
+		HelloWorldImplService helloService = new HelloWorldImplService();
+		HelloWorld hello = helloService.getHelloWorldImplPort();
+		String rspTmp = hello.getHelloWorldAsString(item);
+		return rspTmp;
+	}
+}
+
+class MyRunnable implements Runnable {
+    private String value;
+
+    @Override
+    public void run() {
+       value = Thread.currentThread().getName();
+       System.out.println("Run thread "+Thread.currentThread().getName());
+       System.out.println("Run Thread Thread value: " + value); //Aici value are valoare
+    }
+
+    public String getValue() {
+    	System.out.println("Thread Thread value: " + value +Thread.currentThread().getName());
+        return value; //Aici value nu mai are valoare    
+        }
 }

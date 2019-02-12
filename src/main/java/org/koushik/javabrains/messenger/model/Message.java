@@ -8,44 +8,59 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Message {
 
 	private long id;
-    private String message;
-    private Date created;
-    private String author;
+    private String carti;
+    private String pixuri;
+    private String costume;
     
     public Message() {
     	
     }
-    
-    public Message(long id, String message, String author) {
-    	this.id = id;
-    	this.message = message;
-    	this.author = author;
-    	this.created = new Date();
-    }
-    
+
+	public Message(long id, String carti, String pixuri, String costume) {
+		super();
+		this.id = id;
+		this.carti = carti;
+		this.pixuri = pixuri;
+		this.costume = costume;
+	}
+
 	public long getId() {
 		return id;
 	}
+
 	public void setId(long id) {
 		this.id = id;
 	}
-	public String getMessage() {
-		return message;
+
+	public String getCarti() {
+		return carti;
 	}
-	public void setMessage(String message) {
-		this.message = message;
+
+	public void setCarti(String carti) {
+		this.carti = carti;
 	}
-	public Date getCreated() {
-		return created;
+
+	public String getPixuri() {
+		return pixuri;
 	}
-	public void setCreated(Date created) {
-		this.created = created;
+
+	public void setPixuri(String pixuri) {
+		this.pixuri = pixuri;
 	}
-	public String getAuthor() {
-		return author;
+
+	public String getCostume() {
+		return costume;
 	}
-	public void setAuthor(String author) {
-		this.author = author;
+
+	public void setCostume(String costume) {
+		this.costume = costume;
 	}
+
+	@Override
+	public String toString() {
+		return "Message [id=" + id + ", carti=" + carti + ", pixuri=" + pixuri + ", costume=" + costume + "]";
+	}
+ 
+	
 	
 }

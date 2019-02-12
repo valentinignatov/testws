@@ -1,18 +1,20 @@
 package org.koushik.javabrains.messenger.resources;
 
+import java.util.List;
+
 public class Test {
 
-	private String carti;
+	private List<String> carti;
 
-	public String getCarti() {
+	public List<String> getCarti() {
 		return carti;
 	}
 
-	public void setCarti(String carti) {
+	public void setCarti(List<String> carti) {
 		this.carti = carti;
 	}
 
-	public Test(String carti) {
+	public Test(List<String> carti) {
 		super();
 		this.carti = carti;
 	}
@@ -21,10 +23,10 @@ public class Test {
 		super();
 	}
 
-	@Override
-	public String toString() {
-		return carti;
-	}
+//	@Override
+//	public List<String> toString() {
+//		return carti;
+//	}
 	
 	
 	

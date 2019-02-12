@@ -12,20 +12,20 @@ public class MessageService {
 	
 
 	public List<Message> getAllMessages(String argument) {
-		Message m1 = new Message(1L, "first list that appears when response equals VANEA", "Valentin3453");
-		Message m2 = new Message(2L, "Your sent value was 2!", "Valentin34543 The Value From DB is Chirila");
+		Message m1 = new Message(1L, "first list that appears when response equals VANEA", "Valentin3453", "Test");
+		Message m2 = new Message(2L, "Your sent value was 2!", "Valentin34543 The Value From DB is Chirila", "Test");
 		List<Message> list = new ArrayList<>();
 		list.add(m1);
 		list.add(m2);
 
-		Message m3 = new Message(134L, "second list that appears when response equals Jora!", "test");
-		Message m4 = new Message(22342L, "Your sent value was 1", "test The Value From DB is Moraru");
+		Message m3 = new Message(134L, "second list that appears when response equals Jora!", "test", "Test");
+		Message m4 = new Message(22342L, "Your sent value was 1", "test The Value From DB is Moraru", "Test");
 		List<Message> list2 = new ArrayList<Message>();
 		list2.add(m3);
 		list2.add(m4);
 		
 		List<Message> list3 = new ArrayList<Message>();
-		Message m5 = new Message(666L, "Default", "Default");
+		Message m5 = new Message(666L, "Default", "Default", "Default");
 		list3.add(m5);
 		
 		//Message argument = new Message();
@@ -37,11 +37,12 @@ public class MessageService {
 		System.out.println(argument + " <-the Arg===============================");
 
 		//return hello.getHelloWorldAsString(argument);
-		
-		if (hello.getHelloWorldAsString(argument).equals("JORA")) {
+//		String rsp = hello.getHelloWorldAsString(argument);
+		String rsp = argument;
+		System.out.println("[getAllMessages] - rsp = " + rsp);
+		if ("JORA".equals(rsp)) {
 			return list2;
-		}
-		if (hello.getHelloWorldAsString(argument).equals("VANEA")) 
+		}else if ("VANEA".equals(rsp)) 
 		{
 			return list;
 		} 
