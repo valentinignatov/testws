@@ -11,6 +11,8 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+
 import org.koushik.javabrains.messenger.model.Message;
 import org.koushik.javabrains.messenger.service.MessageArgument;
 import org.koushik.javabrains.messenger.service.MessageService;
@@ -36,6 +38,12 @@ public class MessageResource {
 	ExecutorService service = Executors.newFixedThreadPool(2000); 
 	Message message = new Message();
 	//AICI PRIMESC OBIECT JSON PRIN BODY	
+//		{
+//		  "id":"300", <-DB request by this id and ws request in threads with them
+//		  "carti":"testCarti",
+//		  "pixuri":"TestPixurii",
+//		  "costume":"testCostume"
+//		}
 	@SuppressWarnings("unchecked")
 	@POST	
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -69,7 +77,7 @@ public class MessageResource {
 		return controllerResponse;
 	}
 
-	//AICI PRIMESC VALOAREA PRIN HEADER
+	//AICI PRIMESC VALOAREA PRIN HEADER headerAuthor num
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Message> getMessages(@HeaderParam("headerAuthor") int headerAuthor) throws NumberFormatException, SQLException, InterruptedException, ExecutionException {
@@ -102,7 +110,7 @@ public class MessageResource {
 		return controllerResponse;
 	}
 	
-	//AICI PRIMESC VALOAREA PRIN QUERY PARAM
+	//AICI PRIMESC VALOAREA PRIN QUERY PARAM /query?name='num'
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/query")
@@ -138,15 +146,39 @@ public class MessageResource {
 		};
 		return controllerResponse;
 	}
-	/*
-	//AICI PRIMESC VALOARE PRIN URL
+	
+	//AICI PRIMESC VALOARE PRIN URL /'num'
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/{urlParam}")
-	public List<Message> getUrl(@PathParam("urlParam")int urlPar) throws SQLException{
+	public List<Message> getUrl(@PathParam("urlParam")int urlPar) throws SQLException, InterruptedException, ExecutionException{
 		MySQLAccess access = new MySQLAccess();
-		return messageService.getAllMessages(access.selectRecordsFromTable(urlPar));
-	}*/
+//		return messageService.getAllMessages(access.selectRecordsFromTable(urlPar));
+		System.out.println("------------------------------- ");
+		System.out.println("(In Controler)The argument is "+ urlPar);
+		List<Message> messages = null;
+		messages = access.selectRecordsFromTable(urlPar);
+//		System.out.println("Object returned from selectRecordFromTable()====== " + message.toString());
+		Callable<String> callable = new MyCallable(test);	
+		List<MyThreadIgor> listOfThreads = new ArrayList<>();
+		List<Future<List<Message>>> futures = new ArrayList<Future<List<Message>>>();
+		System.out.println("messages.size(): " + messages.size());
+			
+		for (Message localMessage: messages){
+			int item = (int) localMessage.getId();
+			MyThreadIgor listItemIgor = new MyThreadIgor(localMessage.getCarti());
+//			System.out.println("access.selectRecordsFromTable(item)"+access.selectRecordsFromTable(item));
+			listOfThreads.add(listItemIgor);
+		}
+		
+		futures = service.invokeAll(listOfThreads);
+		System.out.println("futures.size()"+futures.size());
+		for (int i=0; i<futures.size(); i++) {
+			System.out.println("futures: "+futures.get(i).get());
+			controllerResponse.addAll(futures.get(i).get());
+		};
+		return controllerResponse;
+	}
 	
 }
 
