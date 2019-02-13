@@ -1,8 +1,10 @@
 package org.koushik.javabrains.messenger.resources;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -13,6 +15,8 @@ import org.koushik.javabrains.messenger.model.Message;
 import org.koushik.javabrains.messenger.service.MessageArgument;
 import org.koushik.javabrains.messenger.service.MessageService;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -26,7 +30,7 @@ public class MessageResource {
 	MessageArgument messageArgument = new MessageArgument();
 	MessageService messageService = new MessageService();
 	MySQLAccess mySQLAccess = new MySQLAccess();
-	ExecutorService service = Executors.newFixedThreadPool(100); 
+	ExecutorService service = Executors.newFixedThreadPool(2000); 
 	Message message = new Message();
 	//AICI PRIMESC OBIECT JSON PRIN BODY	
 	@SuppressWarnings("unchecked")
@@ -44,33 +48,13 @@ public class MessageResource {
 		Callable<String> callable = new MyCallable(test);	
 		List<MyThreadIgor> listOfThreads = new ArrayList<>();
 		List<Future<List<Message>>> futures = new ArrayList<Future<List<Message>>>();
-//		List<String> listTest = new ArrayList<>();
-//		listTest.add(message.getCarti());
-//		listTest.add(message.getCostume());
-//		listTest.add(message.getPixuri());
 		System.out.println("messages.size(): " + messages.size());
-		
-		
+			
 		for (Message localMessage: messages){
 			int item = (int) localMessage.getId();
 			MyThreadIgor listItemIgor = new MyThreadIgor(localMessage.getCarti());
 //			System.out.println("access.selectRecordsFromTable(item)"+access.selectRecordsFromTable(item));
 			listOfThreads.add(listItemIgor);
-			
-			/*List<Message> rsp = service.submit(listItemIgor).get();
-			System.out.println("Response from call() method: " + rsp);
-			controllerResponse.addAll(rsp);*/
-
-			//controllerResponse.add();
-			//MyRunnable thread = new MyRunnable();
-			//new Thread(thread).start();
-			// ... join through some method
-			//new Thread(futureTask).start();
-			//System.out.println(futureTask.get());
-			//MyCallable listItemIgor = new MyCallable(localMessage.getCarti());
-			//String value = thread.getValue();
-			//System.out.println("COntroler Thread value: " + value);
-			
 		}
 		
 		futures = service.invokeAll(listOfThreads);
@@ -82,15 +66,39 @@ public class MessageResource {
 		return controllerResponse;
 	}
 
-/*	//AICI PRIMESC VALOAREA PRIN HEADER
+	//AICI PRIMESC VALOAREA PRIN HEADER
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Message> getMessages(@HeaderParam("headerAuthor") int headerAuthor) throws NumberFormatException, SQLException {
+	public List<Message> getMessages(@HeaderParam("headerAuthor") int headerAuthor) throws NumberFormatException, SQLException, InterruptedException, ExecutionException {
 		MySQLAccess access = new MySQLAccess();
 		System.out.println("headerAuthor: " + headerAuthor);
-		return messageService.getAllMessages(access.selectRecordsFromTable(headerAuthor));
+//		return messageService.getAllMessages(access.selectRecordsFromTable(headerAuthor));
+		System.out.println("------------------------------- ");
+		System.out.println("(In Controler)The argument is "+ headerAuthor);
+		List<Message> messages = null;
+		messages = access.selectRecordsFromTable(headerAuthor);
+//		System.out.println("Object returned from selectRecordFromTable()====== " + message.toString());
+		Callable<String> callable = new MyCallable(test);	
+		List<MyThreadIgor> listOfThreads = new ArrayList<>();
+		List<Future<List<Message>>> futures = new ArrayList<Future<List<Message>>>();
+		System.out.println("messages.size(): " + messages.size());
+			
+		for (Message localMessage: messages){
+			int item = (int) localMessage.getId();
+			MyThreadIgor listItemIgor = new MyThreadIgor(localMessage.getCarti());
+//			System.out.println("access.selectRecordsFromTable(item)"+access.selectRecordsFromTable(item));
+			listOfThreads.add(listItemIgor);
+		}
+		
+		futures = service.invokeAll(listOfThreads);
+		System.out.println("futures.size()"+futures.size());
+		for (int i=0; i<futures.size(); i++) {
+			System.out.println("futures: "+futures.get(i).get());
+			controllerResponse.addAll(futures.get(i).get());
+		};
+		return controllerResponse;
 	}
-	
+	/*
 	//AICI PRIMESC VALOAREA PRIN QUERY PARAM
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
