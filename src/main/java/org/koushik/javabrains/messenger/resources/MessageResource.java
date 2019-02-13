@@ -19,7 +19,10 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
+
 import com.mkyong.ws.HelloWorld;
 import com.mkyong.ws.HelloWorldImplService;
 import com.mkyong.ws.MySQLAccess;
@@ -98,18 +101,44 @@ public class MessageResource {
 		};
 		return controllerResponse;
 	}
-	/*
+	
 	//AICI PRIMESC VALOAREA PRIN QUERY PARAM
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/query")
-	public List<Message> getUsers(@Context UriInfo info) throws NumberFormatException, SQLException {
+	public List<Message> getUsers(@Context UriInfo info) throws NumberFormatException, SQLException, InterruptedException, ExecutionException {
 		MySQLAccess access = new MySQLAccess();
 		String from = info.getQueryParameters().getFirst("name");
+		int headerAuthor = Integer.parseInt(from);
 		System.out.println(from + " <-From");
-		return messageService.getAllMessages(access.selectRecordsFromTable(Integer.parseInt(from)));
+		System.out.println(headerAuthor + " <-headerAuthor");
+//		return messageService.getAllMessages(access.selectRecordsFromTable(Integer.parseInt(from)));
+		System.out.println("------------------------------- ");
+		System.out.println("(In Controler)The argument is "+ headerAuthor);
+		List<Message> messages = null;
+		messages = access.selectRecordsFromTable(headerAuthor);
+//		System.out.println("Object returned from selectRecordFromTable()====== " + message.toString());
+		Callable<String> callable = new MyCallable(test);	
+		List<MyThreadIgor> listOfThreads = new ArrayList<>();
+		List<Future<List<Message>>> futures = new ArrayList<Future<List<Message>>>();
+		System.out.println("messages.size(): " + messages.size());
+			
+		for (Message localMessage: messages){
+			int item = (int) localMessage.getId();
+			MyThreadIgor listItemIgor = new MyThreadIgor(localMessage.getCarti());
+//			System.out.println("access.selectRecordsFromTable(item)"+access.selectRecordsFromTable(item));
+			listOfThreads.add(listItemIgor);
+		}
+		
+		futures = service.invokeAll(listOfThreads);
+		System.out.println("futures.size()"+futures.size());
+		for (int i=0; i<futures.size(); i++) {
+			System.out.println("futures: "+futures.get(i).get());
+			controllerResponse.addAll(futures.get(i).get());
+		};
+		return controllerResponse;
 	}
-	
+	/*
 	//AICI PRIMESC VALOARE PRIN URL
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
