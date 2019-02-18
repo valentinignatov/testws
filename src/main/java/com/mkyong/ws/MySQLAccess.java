@@ -33,13 +33,15 @@ public static void main(String[] argv) {
 
 }
 
-public List<Message> selectRecordsFromTable(int id) throws SQLException {
+public List<Persons> selectRecordsFromTable(int id) throws SQLException {
 	
 	Connection dbConnection = null;
 	PreparedStatement preparedStatement = null;
-	String selectSQL = "select * from produse where id <= ?;";// where id=?;";
+	String selectSQL = "select * from  Lista_Persoane where Nr_Ordine=? and id<=500;";//Nr_Ordine=?;";// where id=?;";
     Message message = new Message();
+    Persons persons = new Persons();
     List<Message> messages = new ArrayList<Message>();
+    List<Persons> persons_list = new ArrayList<Persons>();
 	
 	try {
 		dbConnection = getDBConnection();
@@ -50,9 +52,10 @@ public List<Message> selectRecordsFromTable(int id) throws SQLException {
 		ResultSet rs = preparedStatement.executeQuery();
 
 		while (rs.next()) {
-			message = new Message(rs.getInt("id"),rs.getString("Carti"),rs.getString("Pixuri"),rs.getString("Costume"));
-			System.out.println("rs.getInt('id'): " + rs.getInt("id"));
-			messages.add(message);
+//			message = new Message(rs.getInt("id"),rs.getString("Carti"),rs.getString("Pixuri"),rs.getString("Costume"));
+//			System.out.println("rs.getInt('id'): " + rs.getInt("id"));
+			persons = new Persons(rs.getInt("id"),rs.getInt("Nr_Ordine"),rs.getString("IDNP"),rs.getString("Name"),rs.getString("Surname"),rs.getString("Birthday"),rs.getString("Buletinseries"),rs.getString("BuletinNr"));
+			persons_list.add(persons);
 		}
 
 	} catch (SQLException e) {
@@ -71,7 +74,7 @@ public List<Message> selectRecordsFromTable(int id) throws SQLException {
 
 	}
 	
-	return messages;
+	return persons_list;
 
 }
 

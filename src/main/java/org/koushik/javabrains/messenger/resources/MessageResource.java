@@ -28,15 +28,20 @@ import javax.ws.rs.core.UriInfo;
 import com.mkyong.ws.HelloWorld;
 import com.mkyong.ws.HelloWorldImplService;
 import com.mkyong.ws.MySQLAccess;
+import com.mkyong.ws.Persons;
+import com.mkyong.ws.Response;
 @Path("/messages")
 public class MessageResource {
 	String test = "";
-	List<Message> controllerResponse = new ArrayList<Message>();
+	List<Response> controllerResponse = new ArrayList<Response>();
 	MessageArgument messageArgument = new MessageArgument();
 	MessageService messageService = new MessageService();
 	MySQLAccess mySQLAccess = new MySQLAccess();
 	ExecutorService service = Executors.newFixedThreadPool(2000); 
 	Message message = new Message();
+	Persons persons = new Persons();
+	
+	List<Persons> persons_list = new ArrayList<Persons>();
 	//AICI PRIMESC OBIECT JSON PRIN BODY	
 //		{
 //		  "id":"300", <-DB request by this id and ws request in threads with them
@@ -48,23 +53,25 @@ public class MessageResource {
 	@POST	
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Message> getArg(Message message) throws Exception{
+	public List<Response> getArg(Message message) throws Exception{
 		//HERE WE RETURN THE MESSEGES
 		MySQLAccess access = new MySQLAccess();
 		System.out.println("------------------------------- ");
 		System.out.println("(In Controler)The argument is "+ message.getId());
 		List<Message> messages = null;
-		messages = access.selectRecordsFromTable((int)message.getId());
-		System.out.println("Object returned from selectRecordFromTable()====== " + message.toString());
-		Callable<String> callable = new MyCallable(test);	
+		persons_list =access.selectRecordsFromTable((int)message.getId());
+		//de facut clasa entitate Response care contine Persons + response ws din thread(SoapUI) si ea o sa fie returnata
+//		System.out.println("Object returned from selectRecordFromTable()====== " + persons.toString());
 		List<MyThreadIgor> listOfThreads = new ArrayList<>();
-		List<Future<List<Message>>> futures = new ArrayList<Future<List<Message>>>();
-		System.out.println("messages.size(): " + messages.size());
+		List<Future<String>> futures = new ArrayList<Future<String>>();
 			
-		for (Message localMessage: messages){
-			int item = (int) localMessage.getId();
-			MyThreadIgor listItemIgor = new MyThreadIgor(localMessage.getCarti());
+		for (Persons person: persons_list){
+			int item = (int) person.getId();
+			MyThreadIgor listItemIgor = new MyThreadIgor(person.getName());
 //			System.out.println("access.selectRecordsFromTable(item)"+access.selectRecordsFromTable(item));
+			System.out.println("Object returned from selectRecordFromTable()====== " + person.getId()+" "+person.getName()+" "+person.getSurname()+" "+person.getBirthday());
+			
+			System.out.println("listItemIgor "+listItemIgor);
 			listOfThreads.add(listItemIgor);
 		}
 		
@@ -72,11 +79,20 @@ public class MessageResource {
 		System.out.println("futures.size()"+futures.size());
 		for (int i=0; i<futures.size(); i++) {
 			System.out.println("futures: "+futures.get(i).get());
-			controllerResponse.addAll(futures.get(i).get());
+//			controllerResponse.add(futures.get(i).get());
+//			System.out.println("Object returned from selectRecordFromTable()====== " + person.getId()+" "+person.getName()+" "+person.getSurname()+" "+person.getBirthday());
+//			controllerResponse.add(persons);
 		};
+		int i = 0;
+		for (Persons person: persons_list){
+			System.out.println("In las cicle====== " + person.getId()+" "+person.getName()+" "+person.getSurname()+" "+person.getBirthday()+" "+futures.get(i).get());
+			Response response = new Response(person.getId(),person.getNr_ordine(),person.getIdnp(),person.getName(),person.getSurname(),person.getBirthday(),person.getBuletinseries(),person.getBuletinnr(),futures.get(i).get());
+			i++;
+			controllerResponse.add(response);
+		}
 		return controllerResponse;
 	}
-
+/*
 	//AICI PRIMESC VALOAREA PRIN HEADER headerAuthor num
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -178,12 +194,12 @@ public class MessageResource {
 			controllerResponse.addAll(futures.get(i).get());
 		};
 		return controllerResponse;
-	}
+	}*/
 	
 }
 
 
-class MyThreadIgor implements Callable<List<Message>>{
+class MyThreadIgor implements Callable<String>{
 	private String item; 
 	private String response = "";
 	MessageService messageService = new MessageService();
@@ -201,14 +217,15 @@ class MyThreadIgor implements Callable<List<Message>>{
 		this.item = item;
 	}
 	@Override
-	public List<Message> call(){
+	public String call(){
 		System.out.println("Thread name is------------------------------- " + Thread.currentThread().getName());
-		System.out.println("(In Thread)item" + item);
+		System.out.println("(In Thread)item: " + item);
 		String rspTmp = hello.getHelloWorldAsString(item);	
 		System.out.println("(In Thread)hello.getHelloWorldAsString(item) !!!= " + rspTmp);
 		setResponse(rspTmp);
 		
-		return messageService.getAllMessages(rspTmp);
+//		return messageService.getAllMessages(rspTmp);
+		return rspTmp;
 	}
 }
 

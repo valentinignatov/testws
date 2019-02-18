@@ -15,6 +15,9 @@ public class Message {
     public Message() {
     	
     }
+    public Message(int id) {
+    	this.id = id;
+    }
 
 	public Message(long id, String carti, String pixuri, String costume) {
 		super();
